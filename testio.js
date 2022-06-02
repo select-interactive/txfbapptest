@@ -1,7 +1,7 @@
 const { io } = require("socket.io-client");
 
 const URL = process.env.URL || 'https://texas-football-scores-sockets.azurewebsites.net'; // "http://localhost:3001";
-const MAX_CLIENTS = 1700;
+const MAX_CLIENTS = 15000;
 const POLLING_PERCENTAGE = 0.05;
 const CLIENT_CREATION_INTERVAL_IN_MS = 10;
 const EMIT_INTERVAL_IN_MS = 10000;
