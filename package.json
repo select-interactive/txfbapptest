@@ -1,0 +1,10 @@
+{
+  "name": "appTest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "testio.js",
+  "dependencies": {
+    "socket.io-client": "^4.5.1"
+  }
+
+}
