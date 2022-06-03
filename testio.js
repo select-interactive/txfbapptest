@@ -21,31 +21,35 @@ let packetsSinceLastReport = 0;
 
 let countGet = false;
 
-
+let abortConnections = false;
+let disconnectCntr = 0;
 
 
 const createClient = ( gameId, clientId ) => {
 
-  if ( clientCount > 0 ) {
+  if ( !abortConnections ) {
 
     let disconnected = true;
-    let disconnectCntr = 0;
 
     const transports = [ "websocket" ];
     const socket = io( `${ URL }/games?gameId=${ gameId }`, {
       'transports': [ 'websocket' ],
-      'reconnectionDelay': 10000
+      'reconnection': false
     } );
 
     //games?gameid=60847&userid=1
 
     socket.on( 'connect', _ => {
+      totalConnections += 1;
       disconnected = false;
     } );
 
     socket.on( 'connect_error', ( e ) => {
-      console.log( `** Connection Error (${ clientId }) **` );
-      clientCount = -1;
+      if ( !abortConnections ) {
+        console.log( `** Connection Error (${ MAX_CLIENTS - clientId }) ${ e.message }` );
+        clientCount = -1;
+        abortConnections = true;
+      }
     } );
 
 
@@ -92,6 +96,9 @@ const printReport = () => {
   if ( packetsSinceLastReport > 0 ) {
     console.log( `Score Update Msgs-> ${ packetsSinceLastReport }` );
   }
+
+  console.log( `Total Disconnections : (${ disconnectCntr })` );
+
   packetsSinceLastReport = 0;
   lastReport = now;
 };
@@ -101,10 +108,10 @@ setInterval( printReport, 5000 );
 
 const runner = () => {
  
-  if ( clientCount > 0 ) {
+  if ( clientCount > 0 && !abortConnections ) {
 
     if ( gameIdx >= 0 ) {
-      totalConnections += 1;
+      
 
       if ( clientCount % 100 === 0 ) {
         console.log( `Client #: ${ clientCount } / GameIdx: ${ gameIdx }` );
@@ -123,7 +130,10 @@ const runner = () => {
 
   }
   else {
-    console.log( `**** Connections ${totalConnections} **` );
+    if ( abortConnections ) {
+      console.log( '===== Aborted due to error ====' );
+    }
+    console.log( `**** Successful Connections ${totalConnections} **` );
   }
 
 
