@@ -79,7 +79,7 @@ const createClient = ( gameId, clientId ) => {
     socket.on( "disconnect", ( reason ) => {
       if ( !disconnected ) {
         disconnectCntr += 1;
-        console.log( `${ clientId } -> ${ reason } : (${ disconnectCntr })` );
+        //console.log( `${ clientId } -> ${ reason } : (${ disconnectCntr })` );
       }
       disconnected = true;
     } );
@@ -101,10 +101,12 @@ const printReport = () => {
   const now = new Date().getTime();
   const durationSinceLastReport = (now - lastReport) / 1000;
   if ( packetsSinceLastReport > 0 ) {
-    console.log( `Score Update Msgs-> ${ packetsSinceLastReport }` );
+    console.log( '**********************' );
+    console.log( `*** Score Update Msgs-> ${ packetsSinceLastReport }` );
+    console.log( '**********************' );
   }
 
-  console.log( `Totals Connections: ${totalConnections}  Disconnections : ${ disconnectCntr }   Errors: ${errCntr}  Reconnections: ${reconnectCntr}` );
+  console.log( `Conn: ${totalConnections}  Disconn : ${ disconnectCntr }   Errors: ${errCntr}  Recon: ${reconnectCntr}` );
 
   packetsSinceLastReport = 0;
   lastReport = now;
@@ -130,7 +132,7 @@ const runner = () => {
       gameIdx = gameList.length - 1;
       clientCount -= 1;
     }
-
+    
     setTimeout( _ => runner(), CLIENT_CREATION_INTERVAL_IN_MS );
     
     
@@ -141,7 +143,6 @@ const runner = () => {
       console.log( '===== Aborted due to error ====' );
     }
     console.log( `**** Successful Connections ${totalConnections} **` );
-    console.log( `**** Error Count ${totalConnections} **` );
     console.log( '--- Start Time:', startTime );
     console.log( '--- End Time:', new Date() );
   }
