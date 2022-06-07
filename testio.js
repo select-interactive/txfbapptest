@@ -1,9 +1,9 @@
 const { io } = require("socket.io-client");
 
 const URL = process.env.URL || 'https://texas-football-scores-sockets.azurewebsites.net'; // "http://localhost:3001";
-const MAX_CLIENTS = 15000;
+const MAX_CLIENTS = 14000;
 const POLLING_PERCENTAGE = 0.05;
-const CLIENT_CREATION_INTERVAL_IN_MS = 1;
+const CLIENT_CREATION_INTERVAL_IN_MS = 100;
 const EMIT_INTERVAL_IN_MS = 10000;
 
 //const gameId = 60847;, 69308, 72905 
@@ -134,9 +134,12 @@ const runner = () => {
       console.log( '===== Aborted due to error ====' );
     }
     console.log( `**** Successful Connections ${totalConnections} **` );
+    console.log( '--- Start Time:', startTime );
+    console.log( '--- End Time:', new Date() );
   }
 
 
 }
 
+const startTime = new Date();
 runner();
