@@ -3,7 +3,7 @@ const { io } = require("socket.io-client");
 const URL = process.env.URL || 'https://texas-football-scores-sockets.azurewebsites.net'; // "http://localhost:3001";
 const MAX_CLIENTS = 14000;
 const POLLING_PERCENTAGE = 0.05;
-const CLIENT_CREATION_INTERVAL_IN_MS = 10;
+const CLIENT_CREATION_INTERVAL_IN_MS = 50;
 const EMIT_INTERVAL_IN_MS = 10000;
 
 //const gameId = 60847;, 69308, 72905 
@@ -23,7 +23,9 @@ let countGet = false;
 
 let abortConnections = false;
 let disconnectCntr = 0;
+let reconnectCntr = 0;
 
+let errCntr = 0;
 
 const createClient = ( gameId, clientId ) => {
 
@@ -34,7 +36,7 @@ const createClient = ( gameId, clientId ) => {
     const transports = [ "websocket" ];
     const socket = io( `${ URL }/games?gameId=${ gameId }`, {
       'transports': [ 'websocket' ],
-      'reconnection': false
+      'reconnection': true
     } );
 
     //games?gameid=60847&userid=1
@@ -44,11 +46,16 @@ const createClient = ( gameId, clientId ) => {
       disconnected = false;
     } );
 
+    socket.io.on( 'reconnect', _ => {
+      reconnectCntr += 1;
+    } );
+
     socket.on( 'connect_error', ( e ) => {
       if ( !abortConnections ) {
-        console.log( `** Connection Error (${ MAX_CLIENTS - clientId }) ${ e.message }` );
-        clientCount = -1;
-        abortConnections = true;
+        //console.log( `** Connection Error (${ MAX_CLIENTS - clientId }) ${ e.message }` );
+        //clientCount = -1;
+        //abortConnections = true;
+        errCntr += 1;
       }
     } );
 
@@ -97,7 +104,7 @@ const printReport = () => {
     console.log( `Score Update Msgs-> ${ packetsSinceLastReport }` );
   }
 
-  console.log( `Total Disconnections : (${ disconnectCntr })` );
+  console.log( `Totals Connections: ${totalConnections}  Disconnections : ${ disconnectCntr }   Errors: ${errCntr}  Reconnections: ${reconnectCntr}` );
 
   packetsSinceLastReport = 0;
   lastReport = now;
@@ -113,8 +120,8 @@ const runner = () => {
     if ( gameIdx >= 0 ) {
       
 
-      if ( clientCount % 100 === 0 ) {
-        console.log( `Client #: ${ clientCount } / GameIdx: ${ gameIdx }` );
+      if ( clientCount % 100 === 0 && gameIdx === 0 ) {
+        console.log( `Progress: ${ MAX_CLIENTS - clientCount } of ${MAX_CLIENTS}` );
       }
       createClient( gameList[ gameIdx ], clientCount );
       gameIdx -= 1;
@@ -134,6 +141,7 @@ const runner = () => {
       console.log( '===== Aborted due to error ====' );
     }
     console.log( `**** Successful Connections ${totalConnections} **` );
+    console.log( `**** Error Count ${totalConnections} **` );
     console.log( '--- Start Time:', startTime );
     console.log( '--- End Time:', new Date() );
   }
